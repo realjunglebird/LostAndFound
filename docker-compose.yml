@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: lost_and_found_db
+    environment:
+      POSTGRES_USER: laf_user
+      POSTGRES_PASSWORD: lostandfound
+      POSTGRES_DB: lost_and_found
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lost_and_found_backend
+    ports:
+      - "5000:80"
+    depends_on:
+      - postgres-db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: lost_and_found_fronend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:
